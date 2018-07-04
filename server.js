@@ -1,15 +1,13 @@
-const mongoose = require('mongoose'); // podpinamy mongoose
-const Schema = mongoose.Schema; //	Główny konstruktor modeli
-//	Modele w Mongoose są konstruktorami, które sami definiujemy. Reprezentują one dokumenty, które mogą być zapisywane
-//	i odczytywane z bazy danych. W schemacie tego modelu należy określić klucz oraz typ wartości jaką będzie 
-//	przechowywał. Aby to zrobić, najpierw musimy pobrać główny konstruktor takich modeli.
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
-mongoose.connect('mongodb://localhost/nodeappdatabase', { //podpinanuie bazy danych aby nasa aplikcja miała dane, na krórych będzie pracować
-    useMongoClient: true 
+mongoose.Promise = global.Promise;
+mongoose.connect('mongodb://localhost/nodeappdatabase', {
+    useMongoClient: true
 });
 
-//	new user Schema
-const userSchema = new Schema({ // tworzę schemat dla aplikacji, która będzie tworzyć użytkowników
+//new user Schema
+const userSchema = new Schema({
     name: String,
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
@@ -18,17 +16,14 @@ const userSchema = new Schema({ // tworzę schemat dla aplikacji, która będzie
     updated_at: Date
 });
 
-//	Mongoose schema method
-userSchema.methods.manify = function(next) { //funkcja ,która zmodyfikuje nam imię podczas tworzenia instancji
+//Mongoose schema method
+userSchema.methods.manify = function(next) {
     this.name = this.name + '-boy';
 
     return next(null, this.name);
 };
 
-//Główny konstruktor schematów, który przypisaliśmy do zmiennej Schema posiada metodę .pre(), 
-//która wykonuje się przed metodą określoną jako parametr.
-
-//	pre-save method
+//pre-save method
 userSchema.pre('save', function(next) {
     //pobranie aktualnego czasu
     const currentDate = new Date();
@@ -36,12 +31,9 @@ userSchema.pre('save', function(next) {
     //zmiana pola na aktualny czas
     this.updated_at = currentDate;
 
-    if (!this.created_at) {
+    if (!this.created_at)
         this.created_at = currentDate;
-    }
 
-    // next() jest funkcją która przechodzi do następnego hooka do
-    // wykonania przed lub po requeście
     next();
 });
 
@@ -52,8 +44,6 @@ const kenny = new User({
     username: 'Kenny_the_boy',
     password: 'password'
 });
-// do tego moentu jest taki nasz szablon
-
 
 kenny.manify(function(err, name) {
     if (err) throw err;
